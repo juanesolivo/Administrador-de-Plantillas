@@ -1,0 +1,6 @@
+@Administrador_de_Plantillas_HostAddress = http://localhost:5220
+
+GET {{Administrador_de_Plantillas_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
