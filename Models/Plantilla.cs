@@ -7,7 +7,7 @@ namespace Administrador_de_Plantillas.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; private set; }
+        public string? Id { get;  set; }
 
         [BsonElement("NombrePlantilla")]
         public string NombrePlantilla { get; set; }

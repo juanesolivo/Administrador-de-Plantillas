@@ -24,5 +24,13 @@ namespace Administrador_de_Plantillas.Services
 
         public async Task CreateAsync(Plantilla plantilla) =>
             await _plantillasCollection.InsertOneAsync(plantilla);
+
+        public async Task UpdateAsync(string id, Plantilla plantilla) =>
+            await _plantillasCollection.ReplaceOneAsync(p => p.Id == id, plantilla);
+
+        public async Task RemoveAsync(string? id)
+        {
+            await _plantillasCollection.DeleteOneAsync(p => p.Id == id);
+        }
     }
 }
