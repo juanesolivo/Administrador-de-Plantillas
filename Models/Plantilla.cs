@@ -14,5 +14,8 @@ namespace Administrador_de_Plantillas.Models
 
         [BsonElement("CuerpoHTML")]
         public string CuerpoHTML { get; set; }
+
+        [BsonElement("Variables")]
+        public List<string> Variables { get; set; } = new List<string>();
     }
 }

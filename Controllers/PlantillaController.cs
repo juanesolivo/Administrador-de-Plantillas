@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Administrador_de_Plantillas.Models;
 using Administrador_de_Plantillas.Services;
 
@@ -38,7 +37,13 @@ namespace Administrador_de_Plantillas.Controllers
         [HttpPost(Name = "PostPlantilla")]
         public async Task<IActionResult> Post([FromBody] Plantilla plantilla)
         {
+            if (string.IsNullOrWhiteSpace(plantilla.NombrePlantilla))
+            {
+                return BadRequest("El nombre de la plantilla no puede estar vacío.");
+            }
+
             plantilla.Id = null;
+            plantilla.Variables = PlantillaService.ExtraerVariables(plantilla.CuerpoHTML);
             await _plantillaService.CreateAsync(plantilla);
             return Ok($"Plantilla creada: {plantilla.NombrePlantilla} \n{plantilla.CuerpoHTML}");
         }
@@ -46,12 +51,18 @@ namespace Administrador_de_Plantillas.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(string id, [FromBody] Plantilla plantilla)
         {
+            if (string.IsNullOrWhiteSpace(plantilla.NombrePlantilla))
+            {
+                return BadRequest("El nombre de la plantilla no puede estar vacío.");
+            }
+
             var plantillaActual = await _plantillaService.GetByIdAsync(id);
             if (plantillaActual == null)
             {
-                return NotFound();
+                return NotFound($"No se encontro la plantilla con el id {id}");
             }
             plantilla.Id = id;
+            plantilla.Variables = PlantillaService.ExtraerVariables(plantilla.CuerpoHTML);
             await _plantillaService.UpdateAsync(id, plantilla);
             return Ok($"Plantilla {plantillaActual.NombrePlantilla} actualizada a: {plantilla.NombrePlantilla} \n{plantilla.CuerpoHTML}");
         }

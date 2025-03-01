@@ -1,19 +1,21 @@
 ﻿using Administrador_de_Plantillas.Models;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace Administrador_de_Plantillas.Services
 {
-    
+
     public class PlantillaService
     {
+        /*Servicios de la BD*/
         private readonly IMongoCollection<Plantilla> _plantillasCollection;
 
-        public PlantillaService(IConfiguration config) {
-        
-        var client = new MongoClient(config["mongodb:ConnectionString"]);
-        var database = client.GetDatabase(config["mongodb:DatabaseName"]);
-        _plantillasCollection = database.GetCollection<Plantilla>("Plantillas");
+        public PlantillaService(IConfiguration config)
+        {
+
+            var client = new MongoClient(config["mongodb:ConnectionString"]);
+            var database = client.GetDatabase(config["mongodb:DatabaseName"]);
+            _plantillasCollection = database.GetCollection<Plantilla>("Plantillas");
         }
 
         public async Task<List<Plantilla>> GetAsync() =>
@@ -31,6 +33,14 @@ namespace Administrador_de_Plantillas.Services
         public async Task RemoveAsync(string? id)
         {
             await _plantillasCollection.DeleteOneAsync(p => p.Id == id);
+        }
+
+        /*Demas servicios*/
+
+        public static List<string> ExtraerVariables(string html)
+        {
+            var matches = Regex.Matches(html, "{{(.*?)}}");
+            return matches.Select(m => m.Groups[1].Value.Trim()).Distinct().ToList();
         }
     }
 }
