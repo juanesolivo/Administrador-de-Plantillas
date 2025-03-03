@@ -15,10 +15,19 @@ namespace Administrador_de_Plantillas.Services
             await using var page = await browser.NewPageAsync();
 
             // Cargar el HTML en el navegador
-            await page.SetContentAsync(html);
+            await page.SetContentAsync(html, new NavigationOptions { WaitUntil = new[] { WaitUntilNavigation.Networkidle0 } });
+
+            // Asegurarse de que el contenido se renderiza correctamente
+            await page.EmulateMediaTypeAsync(MediaType.Screen);
 
             // Generar el PDF con formato A4
-            return await page.PdfDataAsync(new PdfOptions { Format = PaperFormat.A4 });
+            var pdfOptions = new PdfOptions
+            {
+                Format = PaperFormat.A4,
+                PrintBackground = true
+            };
+
+            return await page.PdfDataAsync(pdfOptions);
         }
     }
 }

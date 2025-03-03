@@ -19,11 +19,11 @@ namespace Administrador_de_Plantillas.Controllers
         }
 
         [HttpPost("{id}", Name = "GenerarPDF")]
-        public async Task<IActionResult> GenerarPdf(string id,[FromBody] Dictionary<string, object> datos)
+        public async Task<IActionResult> GenerarPdf(string id, [FromBody] Dictionary<string, JsonElement> datos)
         {
             foreach (var key in datos.Keys)
             {
-                Console.WriteLine($"Clave: {key}, Tipo: {datos[key]?.GetType()}");
+                Console.WriteLine($"Clave: {key}, Tipo: {datos[key].ValueKind}");
             }
 
             var plantilla = await _plantillaService.GetByIdAsync(id);
@@ -32,49 +32,46 @@ namespace Administrador_de_Plantillas.Controllers
                 return NotFound("La plantilla no existe.");
             }
 
-
             // Convertir JsonElement a tipos adecuados
             var datosProcesados = new Dictionary<string, object>();
 
             foreach (var kvp in datos)
             {
-                if (kvp.Value is JsonElement jsonElement)
+                if (kvp.Value.ValueKind == JsonValueKind.String)
                 {
-                    if (jsonElement.ValueKind == JsonValueKind.String)
-                    {
-                        datosProcesados[kvp.Key] = jsonElement.GetString();
-                    }
-                    else if (jsonElement.ValueKind == JsonValueKind.Number)
-                    {
-                        datosProcesados[kvp.Key] = jsonElement.GetDouble();
-                    }
-                    else if (jsonElement.ValueKind == JsonValueKind.Array)
-                    {
-                        datosProcesados[kvp.Key] = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(jsonElement.GetRawText());
-                    }
-                    else
-                    {
-                        datosProcesados[kvp.Key] = jsonElement.GetRawText(); // Última opción, como string JSON
-                    }
+                    datosProcesados[kvp.Key] = kvp.Value.GetString();
+                }
+                else if (kvp.Value.ValueKind == JsonValueKind.Number)
+                {
+                    datosProcesados[kvp.Key] = kvp.Value.GetDouble();
+                }
+                else if (kvp.Value.ValueKind == JsonValueKind.Array)
+                {
+                    datosProcesados[kvp.Key] = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(kvp.Value.GetRawText());
                 }
                 else
                 {
-                    datosProcesados[kvp.Key] = kvp.Value;
+                    datosProcesados[kvp.Key] = kvp.Value.GetRawText(); // Última opción, como string JSON
                 }
             }
 
             Console.WriteLine();
             foreach (var key in datosProcesados.Keys)
             {
-                Console.WriteLine($"Clave: {key}, Tipo: {datos[key]?.GetType()}");
+                Console.WriteLine($"Clave: {key}, Tipo: {datosProcesados[key]?.GetType()}");
             }
 
             var template = Handlebars.Compile(plantilla.CuerpoHTML);
             var htmlprocesado = template(datosProcesados);
 
-            
+            // Eliminar espacios en blanco, saltos de línea, tabulaciones y retornos de carro
+            htmlprocesado = htmlprocesado.Replace("\n", "").Replace("\t", "").Replace("\r", "").Trim();
+
+            System.Console.WriteLine("HTML Procesado:");
+            System.Console.WriteLine(htmlprocesado);
+
             byte[] pdf = await _pdfService.GenerarPDF(htmlprocesado);
-            return File(pdf, "application/pdf",$"{plantilla.NombrePlantilla}.pdf");
+            return File(pdf, "application/pdf", $"{plantilla.NombrePlantilla}.pdf");
         }
     }
 }
