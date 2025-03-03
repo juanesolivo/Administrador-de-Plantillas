@@ -20,6 +20,5 @@ namespace Administrador_de_Plantillas.Services
             // Generar el PDF con formato A4
             return await page.PdfDataAsync(new PdfOptions { Format = PaperFormat.A4 });
         }
-
     }
 }

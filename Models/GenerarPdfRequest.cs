@@ -3,6 +3,6 @@
     public class GenerarPdfRequest
     {
         public string IdPlantilla { get; set; } = string.Empty;
-        public Dictionary<string, string> Datos { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, object> Datos { get; set; } = new Dictionary<string, object>();
     }
 }

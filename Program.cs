@@ -1,4 +1,5 @@
 using Administrador_de_Plantillas.Services;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using QuestPDF.Infrastructure;
 
 QuestPDF.Settings.License = LicenseType.Community;
@@ -6,7 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<PlantillaService>();
 builder.Services.AddSingleton<PDFService>();
 // Add services to the container.
+var corsPolicy = "_myAllowSpecificOrigins";
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: corsPolicy,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3000")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -26,7 +38,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(corsPolicy);
 app.UseAuthorization();
 
 app.MapControllers();
